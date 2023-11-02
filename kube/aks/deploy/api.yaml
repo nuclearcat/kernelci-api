@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: kernelci-api-testns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: kernelci/api
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          command:
+            - uvicorn
+          args:
+            - api.main:app
+            - --port
+            - '8000'
+            - --host
+            - 0.0.0.0
+          env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: kernelci-api-secret
+                  key: secret-key
+            - name: MONGO_SERVICE
+              valueFrom:
+                configMapKeyRef:
+                  name: kernelci-api-config
+                  key: mongo_service
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: kernelci-api-config
+                  key: redis_host
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: kernelci-api-testns
+spec:
+  ports:
+    - port: 80
+      targetPort: 8000
+  selector:
+    app: api
