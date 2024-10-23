@@ -22,8 +22,16 @@ spec:
       containers:
         - name: redis
           image: redis:6.2
+          volumeMounts:
+            - name: redis-persistent-storage
+              mountPath: /data
           ports:
             - containerPort: 6379
+      volumes:
+        - name: redis-persistent-storage
+          persistentVolumeClaim:
+            claimName: redis-persistent-storage-claim
+
 ---
 apiVersion: v1
 kind: Service
@@ -35,3 +43,34 @@ spec:
     - port: 6379
   selector:
     app: redis
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-persistent-storage
+  namespace: kernelci-api
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 5Gi
+  storageClassName: standard
+  hostPath:
+    path: /tmp/redis-pv
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-persistent-storage-claim
+  namespace: kernelci-api
+spec:
+  volumeName: redis-persistent-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+  selector:
+    matchLabels:
+      app: redis
