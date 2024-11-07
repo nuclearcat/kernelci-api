@@ -602,3 +602,29 @@ kernelci-api | INFO:     127.0.0.1:35810 - "POST /publish/abc HTTP/1.1" 200 OK
 kernelci-api | INFO:     127.0.0.1:35754 - "GET /listen/abc HTTP/1.1" 200 OK
 kernelci-api | INFO:     127.0.0.1:36744 - "POST /unsubscribe/abc HTTP/1.1" 200 OK
 ```
+
+### Retrieving event history
+
+You can retrieve the history of events for a channel using the `/events` endpoint.
+API keeps only 24h of events in the channel.
+
+```
+$ curl -X 'GET' 'http://localhost:8001/latest/events'
+```
+
+This will return a list of events in the channel.
+Additional GET parameters can be used to filter the events by the channel name, user, or event type.
+
+- `limit`: The number of events to return. Default is unlimited.
+- `from`: The timestamp from which to start returning events.
+- `kind`: The event type to filter by.
+- `state`: The event state to filter by.
+- `recursive`: If true, the API will retrieve also related node data for the event.
+
+```
+$ curl -X 'GET' 'http://localhost:8001/latest/events?limit=10&from=2024-01-01T00:00:00&kind=job&state=done&recursive=true'
+```
+
+This will return the only 10 events of type `job` that are in the `done` state and have been created after `2024-01-01T00:00:00`.
+If you have a lab and pubsub not suitable for your needs, you can use the `events` endpoint to retrieve the history of events, and filter for example only completed kernel builds.
+Example of code available in the `kernelci-pipeline` repository, in tools directory, file `example_api_events.py`.
