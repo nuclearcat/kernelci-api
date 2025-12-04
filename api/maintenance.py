@@ -53,6 +53,12 @@ async def purge_old_nodes(age_days=180, batch_size=1000):
     Purge nodes from the 'nodes' collection that are older than the
     specified number of days.
 
+    Note: Nodes with kind="checkout" are excluded from purging as they
+    serve as root nodes in the hierarchy and are needed for reference.
+    If checkout node referencing last commit in tree+branch deleted, it
+    will cause to retrigger tree checkout and report possibly false
+    regressions. TBD: We need to fix this.
+
     Args:
         age_days (int, optional): The age in days to use as the
         threshold for deletion.
@@ -61,7 +67,8 @@ async def purge_old_nodes(age_days=180, batch_size=1000):
     date_end = datetime.datetime.today() - datetime.timedelta(days=age_days)
     db = connect_to_db()
     nodes = db["nodes"].find({
-        "created": {"$lt": date_end}
+        "created": {"$lt": date_end},
+        "kind": {"$ne": "checkout"}
     })
     # We need to delete node in chunks of {batch_size}
     # to not block the main thread for too long
