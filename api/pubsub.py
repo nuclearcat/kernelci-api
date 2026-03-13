@@ -43,7 +43,8 @@ class PubSub:
         if db_number is None:
             db_number = self._settings.redis_db_number
         self._redis = aioredis.from_url(
-            f'redis://{host}/{db_number}', health_check_interval=30
+            f'redis://{host}/{db_number}',  # noqa: E231
+            health_check_interval=30
         )
         # self._subscriptions is a dict that matches a subscription id
         # (key) with a Subscription object ('sub') and a redis

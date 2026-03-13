@@ -77,7 +77,8 @@ class PubSub:  # pylint: disable=too-many-instance-attributes
             db_number = self._settings.redis_db_number
 
         self._redis = aioredis.from_url(
-            f'redis://{host}/{db_number}', health_check_interval=30
+            f'redis://{host}/{db_number}',  # noqa: E231
+            health_check_interval=30
         )
 
         # MongoDB setup

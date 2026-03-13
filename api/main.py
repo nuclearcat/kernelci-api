@@ -306,7 +306,7 @@ def _resolve_public_base_url(request: Request) -> str:
 
     if forwarded_host:
         scheme = forwarded_proto or request.url.scheme
-        return f"{scheme}://{forwarded_host}".rstrip("/")
+        return f"{scheme}://{forwarded_host}".rstrip("/")  # noqa: E231
 
     return str(request.base_url).rstrip("/")
 
@@ -746,8 +746,8 @@ def _user_can_edit_node(user: User, node: Node) -> bool:
         return True
     runtime = _get_node_runtime(node)
     if runtime:
-        runtime_editor = f'runtime:{runtime}:node-editor'
-        runtime_admin = f'runtime:{runtime}:node-admin'
+        runtime_editor = f'runtime:{runtime}:node-editor'  # noqa: E231
+        runtime_admin = f'runtime:{runtime}:node-admin'  # noqa: E231
         if (runtime_editor in user_group_names
                 or runtime_admin in user_group_names):
             return True
@@ -1172,8 +1172,10 @@ async def get_telemetry_anomalies(
     if not hours:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid window '{window}'. "
-                   f"Use: {', '.join(ANOMALY_WINDOW_MAP.keys())}",
+            detail=(
+                f"Invalid window '{window}'. "
+                f"Use: {', '.join(ANOMALY_WINDOW_MAP.keys())}"
+            ),
         )
     since = datetime.utcnow() - timedelta(hours=hours)
 
